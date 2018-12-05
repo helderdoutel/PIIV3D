@@ -9,35 +9,19 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 
-verticies1 = (
-    (1, -1, -1),
-    (1, 1, -1),
-    (-1, 1, -1),
-    (-1, -1, -1),
-    (1, -1, 1),
-    (1, 1, 1),
-    (-1, -1, 1),
-    (-1, 1, 1)
+verticesOrigem = (
+    (0.50, -0.50, -0.50),
+    (0.50, 0.50, -0.50),
+    (-0.50, 0.50, -0.50),
+    (-0.50, -0.50, -0.50),
+    (0.50, -0.50, 0.50),
+    (0.50, 0.50, 0.50),
+    (-0.50, -0.50, 0.50),
+    (-0.50, 0.50, 0.50)
 )
 
-verticies2 = (
-    (0.25, -0.25, -0.25),
-    (0.25, 0.25, -0.25),
-    (-0.25, 0.25, -0.25),
-    (-0.25, -0.25, -0.25),
-    (0.25, -0.25, 0.25),
-    (0.25, 0.25, 0.25),
-    (-0.25, -0.25, 0.25),
-    (-0.25, 0.25, 0.25)
-)
+esferaOrigem = (1,25,25)
 
-
-<<<<<<< HEAD
-=======
-
-print(verticies2, verticies1)
-
->>>>>>> 48c5ffd1470e7d0c1bf2e6c7dd98d63aebaf40d1
 edges = (
     (0, 1),
     (0, 3),
@@ -53,87 +37,78 @@ edges = (
     (5, 7)
 )
 
+elevadores = []
 
 
+#Gerar os vertices dos elevadores lado lado
+def GerarElevadores(quantidade, espacamento_inicial):
+    espacamento = espacamento_inicial
+    for i in range(quantidade):
+        tupla = tuple([(i[0]+espacamento,i[1],i[2]) for i in verticesOrigem])
+        elevadores.append(tupla)
+        #print(tupla)
+        espacamento += espacamento_inicial
+
+#Move elevador para cima e para baixo
+def MoverElevador(index,direcao):
+    if(direcao):
+        elevadores[index] = tuple([(i[0],i[1]+0.10,i[2]) for i in elevadores[index]])        
+    else:
+        elevadores[index] = tuple([(i[0],i[1]-0.10,i[2]) for i in elevadores[index]])
 
 
-def Cube():
+#Desenha os elevadores(Retangulos) e as pessoas(esferas)
+def Desenhar():
     glBegin(GL_LINES)
-    for edge in edges:
-        for vertex in edge:
-<<<<<<< HEAD
-            glVertex3fv(verticies2[vertex])
-    for edge in edges:
-        for vertex in edge:
-            glVertex3fv(verticies1[vertex])
-=======
-            glVertex3fv(verticies1[vertex])
-    for edge in edges:
-        for vertex in edge:
-            glVertex3fv(verticies2[vertex])            
->>>>>>> 48c5ffd1470e7d0c1bf2e6c7dd98d63aebaf40d1
+    for elevador in elevadores:
+        for edge in edges:
+            for vertex in edge:
+                glVertex3fv(elevador[vertex])      
     glEnd()
 
 
+
 def main():
-<<<<<<< HEAD
-    global verticies1
-=======
-    global verticies2
->>>>>>> 48c5ffd1470e7d0c1bf2e6c7dd98d63aebaf40d1
+
+    
+    GerarElevadores(3,5)
+
     if not glfw.init():
         return
 
-    window = glfw.create_window(800, 600, 'Simulação 3D', None, None)
+    window = glfw.create_window(1920, 1080, 'Simulação 3D', None, None)
 
     if not window:
         glfw.terminate()
         return
 
     glfw.make_context_current(window)
-    # raise Exception(window)
-    gluPerspective(90, (800 / 600), 0., 50.0)
 
-    glTranslatef(0.0, 0.0, -5)
+    gluPerspective(90, (1920 / 1080), 0.,25.0)
+
+    glTranslatef(-10, -5, -15)
+    #glRotatef(45, 3, 0, 0)
+
+    subida = True;
 
     while not glfw.window_should_close(window):
-<<<<<<< HEAD
 
-        if(glfw.get_key(window,glfw.KEY_UP)):         
-            glTranslatef(0.0, 0.0,1.0)
-            time.sleep(0.05)
-=======
-        if glfw.get_key(window,glfw.KEY_ESCAPE):
-            break
-        if glfw.get_key(window,glfw.KEY_UP):
-            v2 = []
-            for x in (verticies2):
-                v = []
-                flag = 0
-                for y in x:
-                    if flag == 0:
-                        v.append(y + 0.1)
-                        flag = 1
-                    else:
-                        v.append(y)
-                v2.append(v)
-
-            verticies2 = v2
-        if glfw.get_key(window,glfw.KEY_DOWN):
-            glTranslate(0,-1,0)
-        if glfw.get_key(window,glfw.KEY_LEFT):
-            glTranslate(-1,0,0)
-        if glfw.get_key(window,glfw.KEY_RIGHT):
-            glTranslate(1,0,0)
-
->>>>>>> 48c5ffd1470e7d0c1bf2e6c7dd98d63aebaf40d1
+        if(subida):
+            for index in range(len(elevadores)):
+                MoverElevador(index,True)    
+                if(elevadores[index][0][1] > 20):
+                    subida = False
+        else:
+            for index in range(len(elevadores)):
+                MoverElevador(index,False)    
+                if(elevadores[index][0][1] < 1):
+                    subida = True                          
+         
         glfw.poll_events()
         glfw.swap_buffers(window)
-        #glRotatef(1, 3, 1, 1)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        Cube()
-        time.sleep(0.001)
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        Desenhar()
 
     glfw.terminate()
 
