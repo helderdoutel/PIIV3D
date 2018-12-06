@@ -50,11 +50,11 @@ def GerarElevadores(quantidade, espacamento_inicial):
         espacamento += espacamento_inicial
 
 #Move elevador para cima e para baixo
-def MoverElevador(index,direcao):
+def MoverElevador(index,direcao,velocidade):
     if(direcao):
-        elevadores[index] = tuple([(i[0],i[1]+0.10,i[2]) for i in elevadores[index]])        
+        elevadores[index] = tuple([(i[0],i[1]+velocidade,i[2]) for i in elevadores[index]])        
     else:
-        elevadores[index] = tuple([(i[0],i[1]-0.10,i[2]) for i in elevadores[index]])
+        elevadores[index] = tuple([(i[0],i[1]-velocidade,i[2]) for i in elevadores[index]])
 
 
 #Desenha os elevadores(Retangulos) e as pessoas(esferas)
@@ -71,7 +71,7 @@ def Desenhar():
 def main():
 
     
-    GerarElevadores(3,5)
+    GerarElevadores(6,5)
 
     if not glfw.init():
         return
@@ -86,23 +86,35 @@ def main():
 
     gluPerspective(90, (1920 / 1080), 0.,25.0)
 
-    glTranslatef(-10, -5, -15)
+    glTranslatef(-15, -5, -15)
     #glRotatef(45, 3, 0, 0)
 
-    subida = True;
+    subidas = [True,True,True,True,True,True];
+    
+    velocidade = 0.10
+    velocidades = []
+
+    for index in range(len(elevadores)):
+        velocidades.append(velocidade)
+        velocidade += 0.10
+        
 
     while not glfw.window_should_close(window):
 
-        if(subida):
-            for index in range(len(elevadores)):
-                MoverElevador(index,True)    
-                if(elevadores[index][0][1] > 20):
-                    subida = False
-        else:
-            for index in range(len(elevadores)):
-                MoverElevador(index,False)    
+        for index in range(len(elevadores)):
+            if(subidas[index]):
+                MoverElevador(index,True,velocidades[index])  
+                if(elevadores[index][0][1] > 10):
+                    subidas[index] = False
+
+            else:
+                MoverElevador(index,False,velocidades[index])    
                 if(elevadores[index][0][1] < 1):
-                    subida = True                          
+                    subidas[index] = True
+
+
+
+
          
         glfw.poll_events()
         glfw.swap_buffers(window)
