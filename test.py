@@ -20,22 +20,6 @@ verticesOrigem = (
     (-0.50, 0.50, 0.50)
 )
 
-pessoaOrigem = (
-    (0, 0.5, 0),
-    (1, 0.5, 0),
-    (0.5, 0.5, 0.5),
-    (0.5,2, 1),
-)
-
-pessoaArestas = (
-    (0,1),
-    (1,2),
-    (2,0),
-    (3,0),
-    (3,1),
-    (3,2)
-)
-
 edges = (
     (0, 1),
     (0, 3),
@@ -50,6 +34,41 @@ edges = (
     (5, 4),
     (5, 7)
 )
+
+pessoaOrigem = (
+    (0, 0.5, 0),
+    (0.1, 0.5, 0),
+    (0.1, 0.5, 0.1),
+    (0, 0.5, 0.1),
+    (0.05,1,0.1)
+)
+
+pessoaArestas = (   
+    (0,1),
+    (1,2),
+    (2,3),
+    (3,0),
+    (4,0),
+    (4,1),
+    (4,2),  
+    (4,3)
+)
+
+
+chaoVertices = (
+    (0, 0.5, 0),
+    (30, 0.5, 0),
+    (30, 0.5, 20),
+    (0, 0.5, 20),
+)
+
+chaoArestas = (
+    (0,1),
+    (1,2),
+    (2,3),
+    (3,0),
+)
+
 
 elevadores = []
 
@@ -76,7 +95,10 @@ def Desenhar():
     glBegin(GL_LINES)
     for edge in pessoaArestas:
         for vertex in edge:
-                glVertex3fv(pessoaOrigem[vertex])              
+                glVertex3fv(pessoaOrigem[vertex])   
+    for edge in chaoArestas:
+        for vertex in edge:
+                glVertex3fv(chaoVertices[vertex])                              
     for elevador in elevadores:
         for edge in edges:
             for vertex in edge:
@@ -132,8 +154,31 @@ def main():
                 if(elevadores[index][0][1] < 1):
                     subidas[index] = True
 
-        # glRotatef(75, 10, 0, 0)
-        time.sleep(0.10)
+        if glfw.get_key(window,glfw.KEY_R):
+            glTranslatef(0, 0, 1)
+        if glfw.get_key(window,glfw.KEY_A): 
+            glTranslatef(1, 0, 0)
+        if glfw.get_key(window,glfw.KEY_F):
+            glTranslatef(0, 0, -1)
+        if glfw.get_key(window,glfw.KEY_D):
+            glTranslatef(-1, 0, 0)
+        if glfw.get_key(window,glfw.KEY_W):
+            glTranslatef(0, -1, 0)
+        if glfw.get_key(window,glfw.KEY_S):
+            glTranslatef(0, 1, 0)
+
+
+        if glfw.get_key(window,glfw.KEY_UP):
+            glRotatef(5, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_DOWN): 
+            glRotatef(-5, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_LEFT):
+            glRotatef(5, 0, 5,0)
+        if glfw.get_key(window,glfw.KEY_RIGHT):
+            glRotatef(5, 0, -5, 0)      
+
+        #glRotatef(75, 10, 0, 0)
+        # time.sleep(0.10)
 
          
         glfw.poll_events()
