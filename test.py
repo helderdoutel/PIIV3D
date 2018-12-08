@@ -10,13 +10,13 @@ from OpenGL.GLU import *
 
 
 verticesOrigem = (
-    (0.50, -0.50, -0.50),
-    (0.50, 0.50, -0.50),
+    (0.50, -0.50, -0.50), #Base direita superior
+    (0.50, 0.50, -0.50), 
     (-0.50, 0.50, -0.50),
-    (-0.50, -0.50, -0.50),
-    (0.50, -0.50, 0.50),
+    (-0.50, -0.50, -0.50), #Base esquerda superior
+    (0.50, -0.50, 0.50), #Base direita inferior
     (0.50, 0.50, 0.50),
-    (-0.50, -0.50, 0.50),
+    (-0.50, -0.50, 0.50), #Base esquerda inferior
     (-0.50, 0.50, 0.50)
 )
 
@@ -35,12 +35,13 @@ edges = (
     (5, 7)
 )
 
+
 pessoaOrigem = (
-    (0, 0.5, 0),
-    (0.1, 0.5, 0),
-    (0.1, 0.5, 0.1),
-    (0, 0.5, 0.1),
-    (0.05,1,0.1)
+    (0, -0.5, 0), # base esquerda superior
+    (0.1, -0.5, 0), # base direita superior
+    (0.1, -0.5, 0.1), # base direita inferior
+    (0, -0.5, 0.1), # base esquerda inferior
+    (0.05,1,0.1) #topo
 )
 
 pessoaArestas = (   
@@ -56,10 +57,10 @@ pessoaArestas = (
 
 
 chaoVertices = (
-    (0, 0.5, 0),
-    (30, 0.5, 0),
-    (30, 0.5, 20),
-    (0, 0.5, 20),
+    (0, -0.5, -50),
+    (50, -0.5, -50),
+    (50, -0.5, 50),
+    (0, -0.5, 50),
 )
 
 chaoArestas = (
@@ -88,6 +89,33 @@ def MoverElevador(index,direcao,velocidade):
         elevadores[index] = tuple([(i[0],i[1]+velocidade,i[2]) for i in elevadores[index]])        
     else:
         elevadores[index] = tuple([(i[0],i[1]-velocidade,i[2]) for i in elevadores[index]])
+
+
+def MoverPessoa(direcao):
+    global pessoaOrigem
+    print ("Base esquerda superior " + str(pessoaOrigem[0]))
+    print ("Base esquerda inferior" + str(pessoaOrigem[3]))
+    print ("Base direita superior " + str(pessoaOrigem[1]))
+    print ("Base direita inferior " + str(pessoaOrigem[2]))
+    if(direcao == 0): #cima
+        pessoaOrigem =  tuple([(i[0],i[1],i[2]-0.10) for i in pessoaOrigem])   
+    elif(direcao == 1): #baixo
+        pessoaOrigem =  tuple([(i[0],i[1],i[2]+0.10) for i in pessoaOrigem])   
+    elif(direcao == 2): #esquerda
+        pessoaOrigem =  tuple([(i[0]-0.10,i[1],i[2]) for i in pessoaOrigem])   
+    elif(direcao == 3): #direita
+        pessoaOrigem =  tuple([(i[0]+0.10,i[1],i[2]) for i in pessoaOrigem])   
+
+
+def colisao(elevador,pessoa):
+    # print(elevador[6][2] )
+    # print(elevador[3][2])
+    if (pessoa[4][0] >= elevador[6][0] and pessoa[4][0] <= elevador[4][0] and pessoa[4][2] <= elevador[6][2]  and  pessoa[4][2] >= elevador[3][2] ):
+        return True
+    else:
+        return False
+
+
 
 
 #Desenha os elevadores(Retangulos) e as pessoas(esferas)
@@ -137,7 +165,11 @@ def main():
 
     while not glfw.window_should_close(window):
 
+
+
         for index in range(len(elevadores)):
+            if(colisao(elevadores[index],pessoaOrigem)):
+               glfw.terminate()
             if(subidas[index]):
                 if(mover[index]):
                     MoverElevador(index,True,velocidade)  
@@ -169,16 +201,23 @@ def main():
 
 
         if glfw.get_key(window,glfw.KEY_UP):
-            glRotatef(5, 10, 0, 0)
+            MoverPessoa(0)
         if glfw.get_key(window,glfw.KEY_DOWN): 
-            glRotatef(-5, 10, 0, 0)
+            MoverPessoa(1)
         if glfw.get_key(window,glfw.KEY_LEFT):
-            glRotatef(5, 0, 5,0)
+            MoverPessoa(2)
         if glfw.get_key(window,glfw.KEY_RIGHT):
-            glRotatef(5, 0, -5, 0)      
+            MoverPessoa(3)  
 
-        #glRotatef(75, 10, 0, 0)
-        # time.sleep(0.10)
+
+        if glfw.get_key(window,glfw.KEY_5):
+            glRotatef(1, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_2): 
+            glRotatef(-1, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_4):
+            glRotatef(1, 0, 5,0)
+        if glfw.get_key(window,glfw.KEY_6):
+            glRotatef(1, 0, -5, 0)      
 
          
         glfw.poll_events()

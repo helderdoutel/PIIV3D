@@ -22,8 +22,6 @@ verticesOrigem = (
     (-0.50, 0.50, 0.50)
 )
 
-esferaOrigem = (1, 25, 25)
-
 edges = (
     (0, 1),
     (0, 3),
@@ -38,6 +36,47 @@ edges = (
     (5, 4),
     (5, 7)
 )
+
+pessoaOrigem = (
+    (0, -0.5, 0), # base esquerda superior
+    (0.1, -0.5, 0), # base direita superior
+    (0.1, -0.5, 0.1), # base direita inferior
+    (0, -0.5, 0.1), # base esquerda inferior
+    (0.05,1,0.1) #topo
+)
+
+pessoaArestas = (   
+    (0,1),
+    (1,2),
+    (2,3),
+    (3,0),
+    (4,0),
+    (4,1),
+    (4,2),  
+    (4,3)
+)
+
+chaoVertices = (
+    (0, -0.5, -50),
+    (50, -0.5, -50),
+    (50, -0.5, 50),
+    (0, -0.5, 50),
+)
+
+chaoArestas = (
+    (0,1),
+    (1,2),
+    (2,3),
+    (3,0),
+)
+
+
+#detecta colisao entre pessoa e elevador
+def colisao(elevador,pessoa):
+    if (pessoa[4][0] >= elevador[6][0] and pessoa[4][0] <= elevador[4][0] and pessoa[4][2] <= elevador[6][2]  and  pessoa[4][2] >= elevador[3][2] ):
+        return True
+    else:
+        return False
 
 
 def gerar_passageiros(quantidade, espacamento_inicial):
