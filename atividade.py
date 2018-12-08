@@ -1,6 +1,6 @@
 import random
 from Elevador import Elevador
-from Passegeiro import Passegeiro
+from Passageiro import Passageiro
 import time
 import datetime
 import numpy as np
@@ -71,11 +71,11 @@ def gerar_passageiros(funcionarios_total=1000, max_por_min=30, min_por_min=0):
         else:
             tec = 0
         while chegou > 0:
-            passageiro = Passegeiro(hora_chegada=hora_chegada)
+            passageiro = passageiro(hora_chegada=hora_chegada)
             fila.append(passageiro)
             hora_chegada = hora_chegada + datetime.timedelta(seconds=tec)
             chegou -= 1
         if chegou == 0:
             hora_chegada = hora_chegada + datetime.timedelta(minutes=1)
 
-print(teste)
+print('teste')
