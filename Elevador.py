@@ -48,3 +48,11 @@ class Elevador(object):
     def set_viagens(self, viagens):
         """."""
         self.viagens = viagens
+
+    def get_vertices(self):
+        """."""
+        return self.vertices
+
+    def set_vertices(self, vertices):
+        """."""
+        self.vertices = vertices
