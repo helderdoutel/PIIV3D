@@ -204,7 +204,7 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
         if not esperar: #Se ninguem estiver se movendo ate o elevador, 
             elevadores[index].set_ultima_partida(hora_atual)
             elevadores[index].set_tempo_viagem(tempo_viagem)
-            elevadores[index].set_viagens()
+            elevadores[index].set_viagens() #incrementa o contador de viagens realizadas pelo elevador
             elevadores[index].zerar_passageiro()
 
 
@@ -216,10 +216,14 @@ fila = gerar_passageiros(elevadores=elevadores)
 
 def main():
 
+    largura_tela = 1280
+    altura_tela = 720
+
     if not glfw.init():
         return
+
     hora_atual = datetime.datetime(2018, 1, 1, 8, 0, 0, 0)
-    window = glfw.create_window(1920, 1080, 'Simulação 3D', None, None)
+    window = glfw.create_window(largura_tela, altura_tela, 'Simulador de elevadores 3D com OPENGL', None, None)
 
     if not window:
         glfw.terminate()
@@ -227,7 +231,7 @@ def main():
 
     glfw.make_context_current(window)
 
-    gluPerspective(90, (1920 / 1080), 0., 25.0)
+    gluPerspective(90, (largura_tela / altura_tela), 0., 25.0)
 
     glTranslatef(-15, -5, -15)
 
