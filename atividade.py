@@ -71,7 +71,8 @@ chaoArestas = (
     (3, 0),
 )
 
-
+#Gera os elevadores com os devidos espacamentos e propriedades iniciais
+#Roda apenas uma vez no inicio de cada rodada
 def gerar_elevadores(quantidade, espacamento_inicial):
     espacamento = espacamento_inicial
     elevadores = []
@@ -131,6 +132,7 @@ def gerar_passageiros(funcionarios_total=1000, max_por_min=30, min_por_min=0, es
     return fila
 
 
+#Move o elevador 3D
 def MoverElevador(index, direcao, velocidade):
     if(direcao):
         elevadores[index].set_vertices(tuple(
@@ -140,6 +142,7 @@ def MoverElevador(index, direcao, velocidade):
             [(i[0], i[1] - velocidade, i[2]) for i in elevadores[index].get_vertices()]))
 
 
+#Verifica se houve colisao entre uma pessoa e um elevador, isto eh, se a pessoa entrou no elevador
 def colisao(elevador,pessoa):
     # print(elevador[6][2] )
     # print(elevador[3][2])
@@ -150,9 +153,9 @@ def colisao(elevador,pessoa):
 
 
 def mover_passageiro(index, hora_atual, velocidade=0.83):
-    xe, ye, ze = elevadores[fila[index].get_elevador()].get_centro_objeto()
-    xp, yp, zp = fila[index].get_centro_objeto()
-    distancia = math.sqrt(((xp - xe) ** 2) + ((xp - xe)**2))
+    xe, ye, ze = elevadores[fila[index].get_elevador()].get_centro_objeto() #Pega coordenadas do elevador destino
+    xp, yp, zp = fila[index].get_centro_objeto() #Pega coordenadas do passageiro
+    distancia = math.sqrt( ((xp - xe) ** 2) + ((xp - xe)**2)) 
     viagens = distancia / velocidade
     velocidade_x = (xp - xe) / viagens
     velocidade_z = (zp - ze) / viagens
@@ -168,30 +171,34 @@ def mover_passageiro(index, hora_atual, velocidade=0.83):
 
 def Desenhar(hora):
     glBegin(GL_LINES)
-    for passageiro in fila:
+    for passageiro in fila: #Desenha passageiros que estao esperando na fila
         if passageiro.esperando(hora):
             for edge in pessoaArestas:
                 for vertex in edge:
                     glVertex3fv(passageiro.get_vertices()[vertex])
-    # for edge in chaoArestas:
+
+
+    # for edge in chaoArestas: #Desenha o chao
     #     for vertex in edge:
     #             glVertex3fv(chaoVertices[vertex])
-    for elevador in elevadores:
+
+
+    for elevador in elevadores: #Desenha os elevadores
         for edge in edges:
             for vertex in edge:
                 glVertex3fv(elevador.get_vertices()[vertex])
     glEnd()
 
-elevadores = gerar_elevadores(4, 5)
-fila = gerar_passageiros(elevadores=elevadores)
+
+
 
 
 def iniciar_viagem(index, hora_atual, tempo_viagem):
     # quebrar = np.random.choice([0, 1], p=[0.99, 0.01])
-    if not elevadores[index].em_viagem(hora_atual):
+    if not elevadores[index].em_viagem(hora_atual): #Verifica se o elevador ja esta em movimento, se nao, esta apto a iniciar uma viagem
         esperar = False
-        for x in elevadores[index].get_passageiros():
-            if fila[x].andando(hora_atual):
+        for x in elevadores[index].get_passageiros(): #Se tiver algum passageiro se movendo ate o elevador, o elevador deve esperar
+            if fila[x].andando():#Para que serve essa hora? Duvida
                 esperar = True
                 break
         if not esperar:
@@ -199,6 +206,12 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
             elevadores[index].set_tempo_viagem(tempo_viagem)
             elevadores[index].set_viagens(1)
             elevadores[index].zerar_passageiro()
+
+
+#Gera os elevadores e a fila de passageiros de acordo com os elevadores
+elevadores = gerar_elevadores(4, 5)
+fila = gerar_passageiros(elevadores=elevadores)
+
 
 
 def main():
@@ -229,6 +242,7 @@ def main():
     flag = 0
     contador = 0
     while not glfw.window_should_close(window):
+        time.sleep(0.001)
         for index in range(len(elevadores)):
             tempo_viagem = round(np.random.normal(120, 10, 1)[0])
             tempo_viagem = round(tempo_viagem / 2) * 2
@@ -245,14 +259,23 @@ def main():
                 else:
                     MoverElevador(index, False, velocidades[index])
         for passageiro in fila:
-            if passageiro.esperando(hora_atual) and not passageiro.andando(hora_atual):
+            if passageiro.esperando(hora_atual) and not passageiro.andando():
                 for index in range(len(elevadores)):
                     if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
                         passageiro.set_elevador(index)
                         elevadores[index].add_passageiro(passageiro.get_id())
                         break
-            if passageiro.andando(hora_atual):
+            if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
+
+        if glfw.get_key(window,glfw.KEY_W):
+            glRotatef(1, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_S): 
+            glRotatef(-1, 10, 0, 0)
+        if glfw.get_key(window,glfw.KEY_A):
+            glRotatef(1, 0, 5,0)
+        if glfw.get_key(window,glfw.KEY_D):
+            glRotatef(1, 0, -5, 0)        
 
         glfw.poll_events()
         glfw.swap_buffers(window)

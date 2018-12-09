@@ -49,7 +49,7 @@ class Passageiro(object):
         """."""
         self.elevador = elevador
 
-    def andando(self, hora_atual):
+    def andando(self):
         """."""
         return (self.get_elevador() is not None and
                 self.get_hora_elevador() is None)
