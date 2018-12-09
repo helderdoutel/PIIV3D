@@ -216,37 +216,31 @@ fila = gerar_passageiros(elevadores=elevadores)
 
 def main():
 
-    largura_tela = 1280
-    altura_tela = 720
+    window = inicializar()
 
-    if not glfw.init():
-        return
 
-    hora_atual = datetime.datetime(2018, 1, 1, 8, 0, 0, 0)
-    window = glfw.create_window(largura_tela, altura_tela, 'Simulador de elevadores 3D com OPENGL', None, None)
 
-    if not window:
-        glfw.terminate()
-        return
 
-    glfw.make_context_current(window)
-
-    gluPerspective(90, (largura_tela / altura_tela), 0., 25.0)
-
-    glTranslatef(-15, -5, -15)
-
+    
+    
+    #Setup da simulacao
     velocidade_elevador = 0.50
-
     contador = 0
+    hora_atual = datetime.datetime(2018, 1, 1, 8, 0, 0, 0)
 
 
-
+    #Loop de execucao principal
     while not glfw.window_should_close(window):
-        time.sleep(0.001)
+
+        #Logica para cada elevador
         for index in range(len(elevadores)):
+
+            #Calcula o tempo de viagem do elevador
             tempo_viagem = round(np.random.normal(120, 10, 1)[0])
             tempo_viagem = round(tempo_viagem / 2) * 2
             tempo_viagem = datetime.timedelta(seconds=tempo_viagem)
+
+
             if elevadores[index].get_ultima_partida() + elevadores[index].get_tempo_viagem() + datetime.timedelta(minutes=2) <= hora_atual:
                 iniciar_viagem(index, hora_atual, tempo_viagem)
             if len(elevadores[index].get_passageiros()) >= 10:
@@ -258,6 +252,9 @@ def main():
                     MoverElevador(index, True, velocidade_elevador)
                 else:
                     MoverElevador(index, False, velocidade_elevador)
+
+
+        #Logica para cada passageiro            
         for passageiro in fila:
             if passageiro.esperando(hora_atual) and not passageiro.andando():
                 for index in range(len(elevadores)):
@@ -268,22 +265,56 @@ def main():
             if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
 
-        if glfw.get_key(window,glfw.KEY_W):
-            glRotatef(1, 10, 0, 0)
-        if glfw.get_key(window,glfw.KEY_S): 
-            glRotatef(-1, 10, 0, 0)
-        if glfw.get_key(window,glfw.KEY_A):
-            glRotatef(1, 0, 5,0)
-        if glfw.get_key(window,glfw.KEY_D):
-            glRotatef(1, 0, -5, 0)        
 
+
+
+        tecla_pressionada(window)   #Verifica se alguma tecla foi pressionada e faz o respectivo tratamento
         glfw.poll_events()
         glfw.swap_buffers(window)
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         Desenhar(hora_atual)
         hora_atual = hora_atual + datetime.timedelta(seconds=1)
+
+
     glfw.terminate()
+
+
+
+def inicializar():
+    largura_tela = 1280
+    altura_tela = 720
+
+    if not glfw.init():
+        return
+
+    window = glfw.create_window(largura_tela, altura_tela, 'Simulador de elevadores 3D com OPENGL', None, None)
+
+    if not window:
+        glfw.terminate()
+        return
+
+    glfw.make_context_current(window)
+
+        #Setup da inicial da camera
+    gluPerspective(90, (largura_tela / altura_tela), 0., 25.0)
+    glTranslatef(-15, -5, -15)
+
+    return window
+
+#Metodo que controla os eventos de key press 
+def tecla_pressionada(window):
+    if glfw.get_key(window,glfw.KEY_ESCAPE): 
+        glfw.terminate()
+
+
+    if glfw.get_key(window,glfw.KEY_W): 
+        glRotatef(1, 10, 0, 0)
+    if glfw.get_key(window,glfw.KEY_S): 
+        glRotatef(-1, 10, 0, 0)
+    if glfw.get_key(window,glfw.KEY_A):
+        glRotatef(1, 0, 5,0)
+    if glfw.get_key(window,glfw.KEY_D):
+        glRotatef(1, 0, -5, 0)            
 
 if __name__ == "__main__":
     main()
