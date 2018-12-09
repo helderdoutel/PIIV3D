@@ -235,16 +235,12 @@ def main():
 
     glTranslatef(-15, -5, -15)
 
-    # subidas = [True, True, True, True, True, True]
+    velocidade_elevador = 0.50
 
-    velocidade = 0.50
-    velocidades = []
-
-    for index in range(len(elevadores)):
-        velocidades.append(velocidade)
-        # velocidade += 0.10
-    flag = 0
     contador = 0
+
+
+
     while not glfw.window_should_close(window):
         time.sleep(0.001)
         for index in range(len(elevadores)):
@@ -259,9 +255,9 @@ def main():
                 if(elevadores[index].get_ultima_partida() + (elevadores[index].get_tempo_viagem() / 2)) > hora_atual:
                     if index == 0:
                         contador += 1
-                    MoverElevador(index, True, velocidades[index])
+                    MoverElevador(index, True, velocidade_elevador)
                 else:
-                    MoverElevador(index, False, velocidades[index])
+                    MoverElevador(index, False, velocidade_elevador)
         for passageiro in fila:
             if passageiro.esperando(hora_atual) and not passageiro.andando():
                 for index in range(len(elevadores)):
