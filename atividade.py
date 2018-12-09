@@ -198,13 +198,13 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
     if not elevadores[index].em_viagem(hora_atual): #Verifica se o elevador ja esta em movimento, se nao, esta apto a iniciar uma viagem
         esperar = False
         for x in elevadores[index].get_passageiros(): #Se tiver algum passageiro se movendo ate o elevador, o elevador deve esperar
-            if fila[x].andando():#Para que serve essa hora? Duvida
+            if fila[x].andando():
                 esperar = True
                 break
-        if not esperar:
+        if not esperar: #Se ninguem estiver se movendo ate o elevador, 
             elevadores[index].set_ultima_partida(hora_atual)
             elevadores[index].set_tempo_viagem(tempo_viagem)
-            elevadores[index].set_viagens(1)
+            elevadores[index].set_viagens()
             elevadores[index].zerar_passageiro()
 
 
