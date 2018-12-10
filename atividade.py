@@ -290,6 +290,15 @@ def main():
                 parar = False
         if parar:
             print('FIM DA SIMULACAO')
+            tempo_espera = None
+            for passageiro in fila:
+                if not tempo_espera:
+                    tempo_espera = passageiro.get_hora_elevador() - passageiro.get_hora_chegada()
+                if tempo_espera < passageiro.get_hora_elevador() - passageiro.get_hora_chegada():
+                    tempo_espera = passageiro.get_hora_elevador() - passageiro.get_hora_chegada()
+            tempo_espera = str(tempo_espera).split(':')
+            print('Tempo de espera: %s horas, %s minutos, %s segundos' %
+                  (tempo_espera[0], tempo_espera[1], tempo_espera[2]))
             break
         for passageiro in fila:
             # Se o passageiro estiver esperando e nao estiver com um elevador atribuido
@@ -300,9 +309,9 @@ def main():
                         passageiro.get_id(), len(fila_esperando), hora_atual)
                     passageiro.set_posicao(len(fila_esperando))
                     fila_esperando.append(passageiro.get_id())
-                else:
-                    atualizar_posicao(passageiro.get_id(),
-                                      fila_esperando.index(passageiro.get_id()))
+                # else:
+                #     atualizar_posicao(passageiro.get_id(),
+                #                       fila_esperando.index(passageiro.get_id()))
                 for index in range(len(elevadores)):
                     if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
                         fila_esperando.remove(passageiro.get_id())
@@ -315,9 +324,9 @@ def main():
             # Move o passageiro ate o seu respectivo elevador atribuido
             if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
-        # for index in fila_esperando:
-        #     if not fila[index].andando():
-        #         atualizar_posicao(index, fila_esperando.index(index))
+        for index in fila_esperando:
+            if not fila[index].andando():
+                atualizar_posicao(index, fila_esperando.index(index))
 
         # Verifica se alguma tecla foi pressionada e faz o respectivo
         # tratamento
