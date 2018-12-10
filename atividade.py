@@ -155,7 +155,7 @@ def colisao(elevador,pessoa):
 def mover_passageiro(index, hora_atual, velocidade=0.83):
     xe, ye, ze = elevadores[fila[index].get_elevador()].get_centro_objeto() #Pega coordenadas do elevador destino
     xp, yp, zp = fila[index].get_centro_objeto() #Pega coordenadas do passageiro
-    distancia = math.sqrt( ((xp - xe) ** 2) + ((xp - xe)**2)) 
+    distancia = math.sqrt(((xp - xe) ** 2) + ((xp - xe)**2))
     viagens = distancia / velocidade
     velocidade_x = (xp - xe) / viagens
     velocidade_z = (zp - ze) / viagens
@@ -168,9 +168,21 @@ def mover_passageiro(index, hora_atual, velocidade=0.83):
     elif zp <= ze:
         fila[index].set_hora_elevador(hora_atual)
 
+
 def mover_passageiro_fila(index, posicao, hora_atual): 
     fila[index].set_vertices(
         tuple([(i[0], i[1], i[2] + posicao) for i in fila[index].get_vertices()]))
+
+
+def atualizar_posicao(index, posicao):
+    posiscao_atual = fila[index].get_posicao()
+    nova = posiscao_atual - posicao
+    # print(index, posiscao_atual, posicao, nova)
+    fila[index].set_vertices(
+        tuple([(i[0], i[1], i[2] - nova) for i in fila[index].get_vertices()]))
+    fila[index].set_posicao(posicao)
+
+
 
 def Desenhar(hora):
     glBegin(GL_LINES)
@@ -225,8 +237,9 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
 
 
 #Gera os elevadores e a fila de passageiros de acordo com os elevadores
-elevadores = gerar_elevadores(2, 5)
-fila = gerar_passageiros(elevadores=elevadores)
+elevadores = gerar_elevadores(4, 5)
+total = 1000
+fila = gerar_passageiros(funcionarios_total=total, elevadores=elevadores)
 velocidade_elevador = 0.50
 largura_tela = 1280
 altura_tela = 720
@@ -274,24 +287,39 @@ def main():
                     MoverElevador(index, False)
 
 
-        #Logica para cada passageiro       
+        #Logica para cada passageiro
+        parar = True
+        for passageiro in fila:
+            if passageiro.get_hora_elevador() is None:
+                parar = False
+        if parar:
+            print('FIM DA SIMULACAO')
+            break
         for passageiro in fila:
             #Se o passageiro estiver esperando e nao estiver com um elevador atribuido
             #Procura um elevador no terreo com menos de 10 passageiros
             if passageiro.esperando(hora_atual) and not passageiro.andando():
                 if passageiro.get_id() not in fila_esperando:
                     mover_passageiro_fila(passageiro.get_id(), len(fila_esperando), hora_atual)
+                    passageiro.set_posicao(len(fila_esperando))
                     fila_esperando.append(passageiro.get_id())
+                else:
+                    atualizar_posicao(passageiro.get_id(), fila_esperando.index(passageiro.get_id()))
                 for index in range(len(elevadores)):
                     if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
                         fila_esperando.remove(passageiro.get_id())
+                        passageiro.set_posicao(None)
                         passageiro.set_elevador(index)
                         elevadores[index].add_passageiro(passageiro.get_id())
                         break
+                for index in fila_esperando:
+                    atualizar_posicao(index, fila_esperando.index(index))
             #Move o passageiro ate o seu respectivo elevador atribuido
             if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
-
+        # for index in fila_esperando:
+        #     if not fila[index].andando():
+        #         atualizar_posicao(index, fila_esperando.index(index))
 
 
         teclado(window)   #Verifica se alguma tecla foi pressionada e faz o respectivo tratamento

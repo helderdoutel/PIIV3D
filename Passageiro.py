@@ -7,6 +7,7 @@ class Passageiro(object):
         self.vertices = None
         self.elevador = None
         self.id_passageiro = id_passageiro
+        self.posicao = None
 
     def get_id(self):
         """."""
@@ -68,3 +69,11 @@ class Passageiro(object):
         menor_z = min([i[2] for i in self.get_vertices()])
         centro_z = menor_z + ((maior_z - menor_z) / 2)
         return centro_x, centro_y, centro_z
+
+    def get_posicao(self):
+        """."""
+        return self.posicao
+
+    def set_posicao(self, posicao):
+        """."""
+        self.posicao = posicao
