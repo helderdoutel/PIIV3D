@@ -168,6 +168,9 @@ def mover_passageiro(index, hora_atual, velocidade=0.83):
     elif zp <= ze:
         fila[index].set_hora_elevador(hora_atual)
 
+def mover_passageiro_fila(index, posicao, hora_atual): 
+    fila[index].set_vertices(
+        tuple([(i[0], i[1], i[2] + posicao) for i in fila[index].get_vertices()]))
 
 def Desenhar(hora):
     glBegin(GL_LINES)
@@ -222,7 +225,7 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
 
 
 #Gera os elevadores e a fila de passageiros de acordo com os elevadores
-elevadores = gerar_elevadores(20, 5)
+elevadores = gerar_elevadores(2, 5)
 fila = gerar_passageiros(elevadores=elevadores)
 velocidade_elevador = 0.50
 largura_tela = 1280
@@ -240,7 +243,7 @@ def main():
     contador = 0
     hora_atual = datetime.datetime(2018, 1, 1, 8, 0, 0, 0)
 
-
+    fila_esperando = []
     #Loop de execucao principal
     while not glfw.window_should_close(window):
 
@@ -271,13 +274,17 @@ def main():
                     MoverElevador(index, False)
 
 
-        #Logica para cada passageiro            
+        #Logica para cada passageiro       
         for passageiro in fila:
             #Se o passageiro estiver esperando e nao estiver com um elevador atribuido
             #Procura um elevador no terreo com menos de 10 passageiros
             if passageiro.esperando(hora_atual) and not passageiro.andando():
+                if passageiro.get_id() not in fila_esperando:
+                    mover_passageiro_fila(passageiro.get_id(), len(fila_esperando), hora_atual)
+                    fila_esperando.append(passageiro.get_id())
                 for index in range(len(elevadores)):
                     if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
+                        fila_esperando.remove(passageiro.get_id())
                         passageiro.set_elevador(index)
                         elevadores[index].add_passageiro(passageiro.get_id())
                         break
