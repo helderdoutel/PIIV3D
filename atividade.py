@@ -155,7 +155,7 @@ def colisao(elevador,pessoa):
 def mover_passageiro(index, hora_atual, velocidade=0.83):
     xe, ye, ze = elevadores[fila[index].get_elevador()].get_centro_objeto() #Pega coordenadas do elevador destino
     xp, yp, zp = fila[index].get_centro_objeto() #Pega coordenadas do passageiro
-    distancia = math.sqrt(((xp - xe) ** 2) + ((xp - xe)**2))
+    distancia = math.sqrt(((xp - xe) ** 2) + ((zp - ze)**2))
     viagens = distancia / velocidade
     velocidade_x = (xp - xe) / viagens
     velocidade_z = (zp - ze) / viagens
@@ -166,6 +166,7 @@ def mover_passageiro(index, hora_atual, velocidade=0.83):
     if colisao(elevadores[fila[index].get_elevador()].get_vertices(), fila[index].get_vertices()):
         fila[index].set_hora_elevador(hora_atual)
     elif zp <= ze:
+        # print(zp, ze)
         fila[index].set_hora_elevador(hora_atual)
 
 
