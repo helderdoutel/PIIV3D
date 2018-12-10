@@ -58,10 +58,10 @@ pessoaArestas = (
 )
 
 chaoVertices = (
-    (0, -0.5, -50),
-    (50, -0.5, -50),
-    (50, -0.5, 50),
-    (0, -0.5, 50),
+    (0, -0.5, 10),
+    (30, -0.5, 10),
+    (30, -0.5, -1),
+    (0, -0.5, -1),
 )
 
 chaoArestas = (
@@ -133,13 +133,13 @@ def gerar_passageiros(funcionarios_total=1000, max_por_min=30, min_por_min=0, es
 
 
 #Move o elevador 3D
-def MoverElevador(index, direcao, velocidade):
+def MoverElevador(index, direcao):
     if(direcao):
         elevadores[index].set_vertices(tuple(
-            [(i[0], i[1] + velocidade, i[2]) for i in elevadores[index].get_vertices()]))
+            [(i[0], i[1] + velocidade_elevador, i[2]) for i in elevadores[index].get_vertices()]))
     else:
         elevadores[index].set_vertices(tuple(
-            [(i[0], i[1] - velocidade, i[2]) for i in elevadores[index].get_vertices()]))
+            [(i[0], i[1] - velocidade_elevador, i[2]) for i in elevadores[index].get_vertices()]))
 
 
 #Verifica se houve colisao entre uma pessoa e um elevador, isto eh, se a pessoa entrou no elevador
@@ -178,9 +178,9 @@ def Desenhar(hora):
                     glVertex3fv(passageiro.get_vertices()[vertex])
 
 
-    # for edge in chaoArestas: #Desenha o chao
-    #     for vertex in edge:
-    #             glVertex3fv(chaoVertices[vertex])
+    for edge in chaoArestas: #Desenha o chao
+        for vertex in edge:
+                glVertex3fv(chaoVertices[vertex])
 
 
     for elevador in elevadores: #Desenha os elevadores
@@ -191,6 +191,19 @@ def Desenhar(hora):
 
 
 
+def ajustar_chao_e_camera():
+    global chaoVertices
+
+    chaoVertices = list(chaoVertices)
+
+    x1 = elevadores[len(elevadores)-1].get_vertices()[0][0] + 4
+
+    chaoVertices[1] = tuple((x1,chaoVertices[1][1],chaoVertices[1][2]))
+    chaoVertices[2] = tuple((x1,chaoVertices[2][1],chaoVertices[2][2]))    
+
+    chaoVertices = tuple(chaoVertices)
+
+    #glTranslatef(0,0,(x1/2)*-1)
 
 
 def iniciar_viagem(index, hora_atual, tempo_viagem):
@@ -209,22 +222,21 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
 
 
 #Gera os elevadores e a fila de passageiros de acordo com os elevadores
-elevadores = gerar_elevadores(4, 5)
+elevadores = gerar_elevadores(20, 5)
 fila = gerar_passageiros(elevadores=elevadores)
+velocidade_elevador = 0.50
+largura_tela = 1280
+altura_tela = 720
+
 
 
 
 def main():
-
     window = inicializar()
-
-
-
-
-    
+    ajustar_chao_e_camera()
     
     #Setup da simulacao
-    velocidade_elevador = 0.50
+
     contador = 0
     hora_atual = datetime.datetime(2018, 1, 1, 8, 0, 0, 0)
 
@@ -235,40 +247,47 @@ def main():
         #Logica para cada elevador
         for index in range(len(elevadores)):
 
+            elevador = elevadores[index]
+
             #Calcula o tempo de viagem do elevador
             tempo_viagem = round(np.random.normal(120, 10, 1)[0])
             tempo_viagem = round(tempo_viagem / 2) * 2
             tempo_viagem = datetime.timedelta(seconds=tempo_viagem)
 
 
-            if elevadores[index].get_ultima_partida() + elevadores[index].get_tempo_viagem() + datetime.timedelta(minutes=2) <= hora_atual:
+            if elevador.get_ultima_partida() + elevador.get_tempo_viagem() + datetime.timedelta(minutes=2) <= hora_atual:
                 iniciar_viagem(index, hora_atual, tempo_viagem)
-            if len(elevadores[index].get_passageiros()) >= 10:
+
+            if len(elevador.get_passageiros()) >= 10:
                 iniciar_viagem(index, hora_atual, tempo_viagem)
-            if elevadores[index].get_ultima_partida() + elevadores[index].get_tempo_viagem() > hora_atual:
-                if(elevadores[index].get_ultima_partida() + (elevadores[index].get_tempo_viagem() / 2)) > hora_atual:
+
+            #Se o elevador estiver em viagem, movimenta o mesmo    
+            if elevador.get_ultima_partida() + elevador.get_tempo_viagem() > hora_atual:
+                if(elevador.get_ultima_partida() + (elevador.get_tempo_viagem() / 2)) > hora_atual:
                     if index == 0:
                         contador += 1
-                    MoverElevador(index, True, velocidade_elevador)
+                    MoverElevador(index, True)
                 else:
-                    MoverElevador(index, False, velocidade_elevador)
+                    MoverElevador(index, False)
 
 
         #Logica para cada passageiro            
         for passageiro in fila:
+            #Se o passageiro estiver esperando e nao estiver com um elevador atribuido
+            #Procura um elevador no terreo com menos de 10 passageiros
             if passageiro.esperando(hora_atual) and not passageiro.andando():
                 for index in range(len(elevadores)):
                     if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
                         passageiro.set_elevador(index)
                         elevadores[index].add_passageiro(passageiro.get_id())
                         break
+            #Move o passageiro ate o seu respectivo elevador atribuido
             if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
 
 
 
-
-        tecla_pressionada(window)   #Verifica se alguma tecla foi pressionada e faz o respectivo tratamento
+        teclado(window)   #Verifica se alguma tecla foi pressionada e faz o respectivo tratamento
         glfw.poll_events()
         glfw.swap_buffers(window)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -281,8 +300,6 @@ def main():
 
 
 def inicializar():
-    largura_tela = 1280
-    altura_tela = 720
 
     if not glfw.init():
         return
@@ -295,26 +312,61 @@ def inicializar():
 
     glfw.make_context_current(window)
 
-        #Setup da inicial da camera
+    
+
+    #Setup da inicial da camera
     gluPerspective(90, (largura_tela / altura_tela), 0., 25.0)
     glTranslatef(-15, -5, -15)
 
     return window
 
+
+
 #Metodo que controla os eventos de key press 
-def tecla_pressionada(window):
+def teclado(window):
+    global chaoVertices
     if glfw.get_key(window,glfw.KEY_ESCAPE): 
         glfw.terminate()
 
 
     if glfw.get_key(window,glfw.KEY_W): 
-        glRotatef(1, 10, 0, 0)
+        glTranslatef(0, -2, 0)
     if glfw.get_key(window,glfw.KEY_S): 
-        glRotatef(-1, 10, 0, 0)
-    if glfw.get_key(window,glfw.KEY_A):
-        glRotatef(1, 0, 5,0)
-    if glfw.get_key(window,glfw.KEY_D):
-        glRotatef(1, 0, -5, 0)            
+        glTranslatef(0, 2, 0)
+    if glfw.get_key(window,glfw.KEY_A): 
+        glTranslatef(2, 0, 0)       
+    if glfw.get_key(window,glfw.KEY_D): 
+        glTranslatef(-2, 0, 0)    
+    if glfw.get_key(window,glfw.KEY_R): 
+        glTranslatef(0, 0, 2)
+    if glfw.get_key(window,glfw.KEY_F): 
+        glTranslatef(0, 0, -2)
+
+    if glfw.get_key(window,glfw.KEY_UP): 
+        glRotatef(5,1,0,0)
+    if glfw.get_key(window,glfw.KEY_DOWN): 
+        glRotatef(5,-1,0,0) 
+    if glfw.get_key(window,glfw.KEY_LEFT): 
+        glRotatef(5,0,1,0)
+    if glfw.get_key(window,glfw.KEY_RIGHT): 
+        glRotatef(5,0,-1,0)   
+
+
+    if glfw.get_key(window,glfw.KEY_O):
+        chaoVertices = list(chaoVertices) 
+        chaoVertices[1] = tuple((chaoVertices[1][0]+1,chaoVertices[1][1],chaoVertices[1][2]))
+        chaoVertices[2] = tuple((chaoVertices[2][0]+1,chaoVertices[2][1],chaoVertices[2][2]))
+        chaoVertices = tuple(chaoVertices) 
+    if glfw.get_key(window,glfw.KEY_L): 
+        chaoVertices = list(chaoVertices) 
+        chaoVertices[1] = tuple((chaoVertices[1][0]-1,chaoVertices[1][1],chaoVertices[1][2]))
+        chaoVertices[2] = tuple((chaoVertices[2][0]-1,chaoVertices[2][1],chaoVertices[2][2]))
+        chaoVertices = tuple(chaoVertices) 
+    
+                     
+
+           
+
 
 if __name__ == "__main__":
     main()
