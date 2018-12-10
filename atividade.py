@@ -319,8 +319,6 @@ def main():
                         passageiro.set_elevador(index)
                         elevadores[index].add_passageiro(passageiro.get_id())
                         break
-                for index in fila_esperando:
-                    atualizar_posicao(index, fila_esperando.index(index))
             # Move o passageiro ate o seu respectivo elevador atribuido
             if passageiro.andando():
                 mover_passageiro(passageiro.get_id(), hora_atual)
