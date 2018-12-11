@@ -229,7 +229,7 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
     # quebrar = np.random.choice([0, 1], p=[0.99, 0.01])
     # Verifica se o elevador ja esta em movimento, se nao, esta apto a iniciar
     # uma viagem
-    if not elevadores[index].em_viagem(hora_atual):
+    if not elevadores[index].em_viagem(hora_atual) and not elevadores[index].quebrado(hora_atual):
         esperar = False
         # Se tiver algum passageiro se movendo ate o elevador, o elevador deve
         # esperar
@@ -243,6 +243,15 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
             # incrementa o contador de viagens realizadas pelo elevador
             elevadores[index].set_viagens()
             elevadores[index].zerar_passageiro()
+            # chance de quebrar nesta viagem
+            quebrar = np.random.choice([0, 1], p=[0.9999, 0.0001])
+            # quebrar = np.random.choice([0, 1], p=[0.5, 0.5])
+            if quebrar:
+                tempo = (np.random.poisson(20, 1))[0]
+                frase = ('Elevador %s quebrou por %s minutos\n') % ((index + 1), tempo)
+                print(frase)
+                tempo = datetime.timedelta(minutes=int(tempo))
+                elevadores[index].set_quebrado_ate(hora_atual + tempo)
 
 
 def main():
@@ -260,9 +269,7 @@ def main():
 
         # Logica para cada elevador
         for index in range(len(elevadores)):
-
             elevador = elevadores[index]
-
             # Calcula o tempo de viagem do elevador
             tempo_viagem = round(np.random.normal(120, 10, 1)[0])
             tempo_viagem = round(tempo_viagem / 2) * 2
@@ -313,7 +320,7 @@ def main():
                 #     atualizar_posicao(passageiro.get_id(),
                 #                       fila_esperando.index(passageiro.get_id()))
                 for index in range(len(elevadores)):
-                    if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10:
+                    if not elevadores[index].em_viagem(hora_atual) and len(elevadores[index].get_passageiros()) < 10 and not elevadores[index].quebrado(hora_atual):
                         fila_esperando.remove(passageiro.get_id())
                         passageiro.set_posicao(None)
                         passageiro.set_elevador(index)
@@ -407,10 +414,21 @@ def teclado(window):
 ne = input('Quantos elevadores?\n')
 while not ne.isdigit():
     ne = input('(Númerico) Quantos elevadores?\n')
+    if not ne.isdigit():
+        if len(ne) == 0:
+            print('Assumindo 4 elevadores')
+            ne = 4
+            break
+
 elevadores = gerar_elevadores(int(ne), 5)
 total = input('Quantas pessoas no total?\n')
 while not total.isdigit():
     total = input('(Númerico) Quantas pessoas no total?\n')
+    if not total.isdigit():
+        if len(total) == 0:
+            print('Assumindo 1000 pessoas')
+            total = 1000
+            break
 total = int(total)
 p_media = input('Quantas pessoas em média por minuto?\n')
 if not p_media.isdigit():

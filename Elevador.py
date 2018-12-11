@@ -8,6 +8,7 @@ class Elevador(object):
         self.quebrado_hora = None
         self.viagens = 0
         self.vertices = None
+        self.quebrado_ate = None
 
     def get_ultima_partida(self):
         """."""
@@ -83,3 +84,16 @@ class Elevador(object):
     def zerar_passageiro(self):
         """."""
         self.passageiros = []
+
+    def get_quebrado_ate(self):
+        """."""
+        return self.quebrado_ate
+
+    def set_quebrado_ate(self, quebrado_ate):
+        """."""
+        self.quebrado_ate = quebrado_ate
+
+    def quebrado(self, hora_atual):
+        """."""
+        return self.get_quebrado_ate() and\
+            self.get_quebrado_ate() > hora_atual or False
