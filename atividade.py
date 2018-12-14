@@ -426,7 +426,6 @@ def calcularMedias(medias,min,max,iteracoes):
         filtrado = [elemento for elemento in medias if elemento[0] == qtd_elevadores]
         soma = sum(e[1] for e in filtrado)
         soma = soma/iteracoes
-        print("Com " + sr)
         refinamento.append(tuple((qtd_elevadores,soma)))
     
     print(refinamento)
