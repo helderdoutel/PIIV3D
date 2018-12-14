@@ -212,6 +212,8 @@ def Desenhar(hora):
 
 def ajustar_chao_e_camera():
     global chaoVertices
+    global elevadores
+    global fila    
 
     chaoVertices = list(chaoVertices)
 
@@ -254,7 +256,11 @@ def iniciar_viagem(index, hora_atual, tempo_viagem):
                 elevadores[index].set_quebrado_ate(hora_atual + tempo)
 
 
-def main():
+def simulacao(qtd_elevadores):
+    global elevadores
+    global fila
+    global medias
+
     window = inicializar()
     ajustar_chao_e_camera()
 
@@ -303,7 +309,9 @@ def main():
                     tempo_espera = passageiro.get_hora_elevador() - passageiro.get_hora_chegada()
                 if tempo_espera < passageiro.get_hora_elevador() - passageiro.get_hora_chegada():
                     tempo_espera = passageiro.get_hora_elevador() - passageiro.get_hora_chegada()
+            medias.append(tuple((qtd_elevadores,tempo_espera.total_seconds())))
             tempo_espera = str(tempo_espera).split(':')
+
             print('Tempo de espera: %s horas, %s minutos, %s segundos' %
                   (tempo_espera[0], tempo_espera[1], tempo_espera[2]))
             break
@@ -410,36 +418,67 @@ def teclado(window):
         chaoVertices = tuple(chaoVertices)
 
 
-# Gera os elevadores e a fila de passageiros de acordo com os elevadores
-ne = input('Quantos elevadores?\n')
-while not ne.isdigit():
-    ne = input('(Númerico) Quantos elevadores?\n')
-    if not ne.isdigit():
-        if len(ne) == 0:
-            print('Assumindo 4 elevadores')
-            ne = 4
-            break
+def calcularMedias(medias,min,max,iteracoes):
 
-elevadores = gerar_elevadores(int(ne), 5)
-total = input('Quantas pessoas no total?\n')
-while not total.isdigit():
-    total = input('(Númerico) Quantas pessoas no total?\n')
-    if not total.isdigit():
-        if len(total) == 0:
-            print('Assumindo 1000 pessoas')
-            total = 1000
-            break
-total = int(total)
-p_media = input('Quantas pessoas em média por minuto?\n')
-if not p_media.isdigit():
-    p_media = 30
-    print('Assumindo 30 pessoas em média por minuto')
-p_media = int(p_media)
-fila = gerar_passageiros(funcionarios_total=total,
-                         max_por_min=p_media, elevadores=elevadores)
+    refinamento = []
+
+    for qtd_elevadores in range(min,max+1):
+        filtrado = [elemento for elemento in medias if elemento[0] == qtd_elevadores]
+        soma = sum(e[1] for e in filtrado)
+        soma = soma/iteracoes
+        print("Com " + sr)
+        refinamento.append(tuple((qtd_elevadores,soma)))
+    
+    print(refinamento)
+
+
+def main():
+    global elevadores
+    global fila
+
+    numero_minimo_elevadores = input('Qual o número mínimo de elevadores?\n')
+    while not numero_minimo_elevadores.isdigit():
+        numero_minimo_elevadores = input('Qual o número mínimo de elevadores?\n')
+
+    numero_máximo_elevadores = input('Qual o número máximo de elevadores?\n')
+    while not numero_máximo_elevadores.isdigit():
+        numero_máximo_elevadores = input('Qual o número máximo de elevadores?\n')
+
+    total_pessoas = input('Quantas pessoas no total?\n')
+    while not total_pessoas.isdigit():
+        total_pessoas = input('(Númerico) Quantas pessoas no total?\n')
+        
+    p_media = input('Quantas pessoas em média por minuto?\n')
+    while not p_media.isdigit():
+        p_media = input('Quantas pessoas em média por minuto?\n')
+
+    iteracoes = input('Quantas iterações por quantidade de elevadores deseja fazer?\n')
+    while not iteracoes.isdigit():
+        iteracoes = input('Quantas iterações por quantidade de elevadores deseja fazer?\n')
+    
+
+    numero_minimo_elevadores = int(numero_minimo_elevadores)
+    numero_máximo_elevadores = int(numero_máximo_elevadores)
+    total_pessoas = int(total_pessoas)
+    p_media = int(p_media)
+    iteracoes= int (iteracoes)
+
+    for qtd_elevadores in range(numero_minimo_elevadores,numero_máximo_elevadores+1):
+
+        for i in range(0,iteracoes):
+            elevadores = gerar_elevadores(qtd_elevadores, 5)
+            fila = gerar_passageiros(funcionarios_total=total_pessoas,
+                                    max_por_min=p_media, elevadores=elevadores)
+            simulacao(qtd_elevadores)
+
+    calcularMedias(medias,numero_minimo_elevadores,numero_máximo_elevadores,iteracoes)
+
+
+medias = []
 velocidade_elevador = 0.50
-largura_tela = 1280
-altura_tela = 720
+largura_tela = 1920 
+altura_tela = 1080
+
 
 if __name__ == "__main__":
     main()
